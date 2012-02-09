@@ -103,10 +103,10 @@ public class World extends JPanel{
 		return out;
 	}
 	
-	private MyRay shootRay(MyPoint3D from, MyPoint3D to) {
+	private MyRay shootRay(MyPoint3D from, MyPoint3D dir) {
 		MyRay ray = new MyRay();
 		ray.setOrigin(from);
-		ray.setDirection(to);
+		ray.setDirection(dir);
 		return ray;
 	}
 	
@@ -135,6 +135,17 @@ public class World extends JPanel{
 					// shoot from intersection point in points surface normal direction
 					MyPoint3D intersection = ray.getOrigin().add(ray.getDirection().mul(maxDist));
 					// check if normal points towards any light source
+					int curLight[] = new int[4];
+					curLight[0] = currentShape.getMaterial().getColor().getRed();
+					curLight[1] = currentShape.getMaterial().getColor().getGreen();
+					curLight[2] = currentShape.getMaterial().getColor().getBlue();
+					curLight[3] = currentShape.getMaterial().getColor().getAlpha();
+					
+					int diffLight[] = new int[4];
+					for(int i=0; i<4; i++) {
+						diffLight[i] = curLight[i];
+					}
+					boolean hasLightSource = false;
 					for(LightSource source : lights) {
 						if(source.intersects(currentShape.getNormal(intersection))) {
 							// now we shoot a ray from the intersection point and see 
@@ -146,7 +157,6 @@ public class World extends JPanel{
 									// check if we got an intersection
 									if(shape.rayIntersect(ray2) > 0) {
 										isShadowed = true;
-										System.out.println("Is shadowed");
 										break;
 									}
 								}
@@ -155,17 +165,45 @@ public class World extends JPanel{
 							if(!isShadowed) {
 								// TODO: improve
 								// add light from light source
-								double lambert = (source.getDirection().
-									dotProduct(currentShape.getNormal(intersection)))*
-									currentShape.getMaterial().getDiffuseC()*source.getBrightness();
-								memory[x+y*width] = currentShape.getMaterial().getColor().getRGB() 
-									+ (int)(lambert*(double)currentShape.getMaterial().getColor().getRGB()); 
+								hasLightSource = true;
+								double dotProd = -source.getDirection().dotProduct(currentShape.getNormal(intersection));
+								for(int i=0; i<4; i++) {
+									diffLight[i] *= dotProd*source.getBrightness();
+									if(diffLight[i] > 255) {
+										diffLight[i] = 255;
+									}
+									if(diffLight[i] < 0) {
+										diffLight[i] = 0;
+									}
+								}
 							}
 						}
 					}
+					// add gathered diffused light
 					// TODO improve
 					// finally add ambient light
-					memory[x+y*width] += currentShape.getMaterial().getColor().getRGB()*currentShape.getMaterial().getAmbientC();
+					int[] ambient = new int[4];
+					for(int i=0; i<4; i++) {
+						ambient[i] += curLight[i]*currentShape.getMaterial().getAmbientC();
+						if(ambient[i] > 255) {
+							ambient[i] = 255;
+						}
+					}
+					// add lights
+					int[] light = new int[4];
+					for(int i=0; i<4;i++) {
+						// TODO improve
+						if(hasLightSource) {
+							light[i] = diffLight[i] + ambient[i];
+						} else {
+							light[i] = ambient[i];
+						}
+						if(light[i] > 255) {
+							light[i] = 255;
+						}
+					}
+					memory[x+y*width] = new Color(light[0], light[1], 
+									light[2], light[3]).getRGB();
 				} else {
 					// no intersection -> use background color
 					memory[x+y*width] = bgColor.getRGB();

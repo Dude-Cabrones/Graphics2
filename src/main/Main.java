@@ -19,15 +19,21 @@ public class Main {
 	
 		// add light source
 		LightSource sourceA = new LightSource();
-		sourceA.setDirection(new MyPoint3D(1,1,0));
+		sourceA.setDirection(new MyPoint3D(1,0,0));
 		sourceA.setBrightness(1.0);
 		world.addLight(sourceA);
 		
 		// add light source
 		LightSource sourceB = new LightSource();
-		sourceB.setDirection(new MyPoint3D(0,1,1));
+		sourceB.setDirection(new MyPoint3D(0,1,0));
 		sourceB.setBrightness(0.5);
 		world.addLight(sourceB);
+		
+		// add light source
+		LightSource sourceC = new LightSource();
+		sourceC.setDirection(new MyPoint3D(0,0,1));
+		sourceC.setBrightness(1.0);
+		//world.addLight(sourceC);
 		
 		// set up quadratic test shape
 		//MyPoint3D ta = new MyPoint3D(12, 384, 600);
@@ -39,17 +45,17 @@ public class Main {
 		// create materials
 		MyMaterial matA = new MyMaterial();
 		matA.setAmbientC(0.2);
-		matA.setDiffuseC(1.0);
+		matA.setDiffuseC(10.0);
 		matA.setColor(Color.red);
 		
 		MyMaterial matB = new MyMaterial();
 		matB.setAmbientC(0.4);
-		matB.setDiffuseC(0.9);
+		matB.setDiffuseC(10.9);
 		matB.setColor(Color.blue);
 		
 		MyMaterial matC = new MyMaterial();
 		matC.setAmbientC(0.6);
-		matC.setDiffuseC(1.0);
+		matC.setDiffuseC(10.0);
 		matC.setColor(Color.yellow);
 		
 		// add test sphere
@@ -61,7 +67,7 @@ public class Main {
 		world.addShape(new MySphere(new MyPoint3D(-100, -100, 50), 40, matB));
 		
 		// add test sphere
-		world.addShape(new MySphere(new MyPoint3D(0, 0, 25), 30, matC));
+		world.addShape(new MySphere(new MyPoint3D(0, 0, 30), 29, matC));
 		
 		// render test shapes
 		world.display();
