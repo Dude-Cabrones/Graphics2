@@ -180,9 +180,9 @@ public class World extends JPanel{
 					light[2] = currentShape.getMaterial().getColor().getBlue();
 					light[3] = currentShape.getMaterial().getColor().getAlpha();
 					
-					for(int i=0; i<4;i++) {
+					for(int i=0; i<3;i++) {
 						// TODO improve
-						light[i] = (int)(light[i]*(ambientLight+diffLight));
+						light[i] = (int)(light[i] - light[i]*(ambientLight+diffLight));
 						if(light[i] > 255) {
 							light[i] = 255;
 						}

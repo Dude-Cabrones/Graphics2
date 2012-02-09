@@ -47,18 +47,18 @@ public class Main {
 	
 		// create materials
 		MyMaterial matA = new MyMaterial();
-		matA.setAmbientC(0.4f);
-		matA.setDiffuseC(0.4f);
+		matA.setAmbientC(0.7f);
+		matA.setDiffuseC(0.7f);
 		matA.setColor(Color.red);
 		
 		MyMaterial matB = new MyMaterial();
-		matB.setAmbientC(0.4f);
-		matB.setDiffuseC(0.4f);
+		matB.setAmbientC(0.7f);
+		matB.setDiffuseC(0.7f);
 		matB.setColor(Color.blue);
 		
 		MyMaterial matC = new MyMaterial();
-		matC.setAmbientC(0.4f);
-		matC.setDiffuseC(0.4f);
+		matC.setAmbientC(0.7f);
+		matC.setDiffuseC(0.7f);
 		matC.setColor(Color.yellow);
 		
 		// add test sphere
