@@ -2,11 +2,11 @@ package impl;
 
 public class Calc {
 
-	public static CalcTuple CalcQuadRoot(double a, double b, double c) {
-		double x1, x2;
-		double det = b*b - 4*a*c;
+	public static CalcTuple CalcQuadRoot(float a, float b, float c) {
+		float x1, x2;
+		float det = b*b - 4*a*c;
 		if(det < 0) {
-			return new CalcTuple(0, 0.0, 0.0);
+			return new CalcTuple(0, 0, 0);
 		}
 		double sign;
 		if(b<0) {
@@ -14,8 +14,8 @@ public class Calc {
 		} else {
 			sign = 1.0;
 		}
-		det = Math.sqrt(det);
-		double q = -0.5*(b+sign*det);
+		det = (float)Math.sqrt(det);
+		float q = (float)-0.5*(b+(float)sign*det);
 		x1 = q/a;
 		x2 = c/q;
 		

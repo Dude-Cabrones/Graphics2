@@ -10,19 +10,19 @@ public class MySphere implements MyShape{
 
 	private MyPoint3D position;	// sphere center
 	private MyMaterial material;	// material
-	private double radius;	// radius
+	private float radius;	// radius
 	
-	public MySphere(MyPoint3D position, double radius, MyMaterial material) {
+	public MySphere(MyPoint3D position, float radius, MyMaterial material) {
 		super();
 		this.position = position;
 		this.radius = radius;
 		this.material = material;
 	}
 	
-	public double rayIntersect(MyRay ray) {
-		double boundingSquare = radius*radius;
+	public float rayIntersect(MyRay ray) {
+		float boundingSquare = radius*radius;
 		MyPoint3D origin = ray.getOrigin().sub(position);
-		double a, b, c;
+		float a, b, c;
 		a = ray.getDirection().dotProduct(ray.getDirection());
 		b = 2*(origin.dotProduct(ray.getDirection()));
 		c = origin.dotProduct(origin)-boundingSquare;
@@ -31,7 +31,7 @@ public class MySphere implements MyShape{
 		CalcTuple tup = Calc.CalcQuadRoot(a, b, c);
 
 		// return closest intersection point (if any)
-		if(tup.getRoot() > 0) {
+		if(tup.getRoots() > 0) {
 			return tup.getIntersectionA() >= 0 
 				? tup.getIntersectionA() : tup.getIntersectionB();
 		} else {

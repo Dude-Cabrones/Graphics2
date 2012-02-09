@@ -7,27 +7,27 @@ public class CalcTuple {
 	 * Simple wrapper class...
 	 */
 	
-	private double root;
-	private double intersectionA;
-	private double intersectionB;
+	private int roots;
+	private float intersectionA;
+	private float intersectionB;
 	
-	public CalcTuple(double root, double intersectionA,
-			double intersectionB) {
+	public CalcTuple(int roots, float intersectionA,
+			float intersectionB) {
 		super();
-		this.root = root;
+		this.roots = roots;
 		this.intersectionA = intersectionA;
 		this.intersectionB = intersectionB;
 	}
 
-	public double getRoot() {
-		return root;
+	public int getRoots() {
+		return roots;
 	}
 
-	public double getIntersectionA() {
+	public float getIntersectionA() {
 		return intersectionA;
 	}
 
-	public double getIntersectionB() {
+	public float getIntersectionB() {
 		return intersectionB;
 	}
 }

@@ -7,7 +7,7 @@ import impl.MyRay;
 
 public interface MyShape {
 
-	public double rayIntersect(MyRay ray);
+	public float rayIntersect(MyRay ray);
 	public MyPoint3D getNormal(MyPoint3D point);
 	
 	// getter and setter methods

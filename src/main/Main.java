@@ -19,20 +19,23 @@ public class Main {
 	
 		// add light source
 		LightSource sourceA = new LightSource();
-		sourceA.setDirection(new MyPoint3D(1,0,0));
-		sourceA.setBrightness(1.0);
+		sourceA.setDirection(new MyPoint3D(1,1,0));
+		sourceA.setOrigin(new MyPoint3D(-100, 100, 50));
+		sourceA.setBrightness(1.0f);
 		world.addLight(sourceA);
 		
 		// add light source
 		LightSource sourceB = new LightSource();
 		sourceB.setDirection(new MyPoint3D(0,1,0));
-		sourceB.setBrightness(0.5);
+		sourceB.setOrigin(new MyPoint3D(100, 100, 30));
+		sourceB.setBrightness(0.5f);
 		world.addLight(sourceB);
 		
 		// add light source
 		LightSource sourceC = new LightSource();
 		sourceC.setDirection(new MyPoint3D(0,0,1));
-		sourceC.setBrightness(1.0);
+		sourceA.setOrigin(new MyPoint3D(0, 100, 20));
+		sourceC.setBrightness(1.0f);
 		//world.addLight(sourceC);
 		
 		// set up quadratic test shape
@@ -44,18 +47,18 @@ public class Main {
 	
 		// create materials
 		MyMaterial matA = new MyMaterial();
-		matA.setAmbientC(0.2);
-		matA.setDiffuseC(10.0);
+		matA.setAmbientC(0.4f);
+		matA.setDiffuseC(0.4f);
 		matA.setColor(Color.red);
 		
 		MyMaterial matB = new MyMaterial();
-		matB.setAmbientC(0.4);
-		matB.setDiffuseC(10.9);
+		matB.setAmbientC(0.4f);
+		matB.setDiffuseC(0.4f);
 		matB.setColor(Color.blue);
 		
 		MyMaterial matC = new MyMaterial();
-		matC.setAmbientC(0.6);
-		matC.setDiffuseC(10.0);
+		matC.setAmbientC(0.4f);
+		matC.setDiffuseC(0.4f);
 		matC.setColor(Color.yellow);
 		
 		// add test sphere

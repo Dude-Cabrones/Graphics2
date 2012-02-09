@@ -6,7 +6,7 @@ public class MyRay {
 	private MyPoint3D origin;
 	private MyPoint3D direction;
 	
-	public MyPoint3D eval(double t) {
+	public MyPoint3D eval(float t) {
 		return origin.add(direction.mul(t));
 	}
 

@@ -2,9 +2,9 @@ package impl;
 
 public class MyPoint3D {
 
-	private double x;
-	private double y;
-	private double z;
+	private float x;
+	private float y;
+	private float z;
 	
 	public MyPoint3D() {
 		super();
@@ -13,7 +13,7 @@ public class MyPoint3D {
 		z = 0;
 	}
 	
-	public MyPoint3D(double x, double y, double z) {
+	public MyPoint3D(float x, float y, float z) {
 		super();
 		this.x = x;
 		this.y = y;
@@ -21,47 +21,51 @@ public class MyPoint3D {
 	}
 	
 	public MyPoint3D add(MyPoint3D point) {
-		double nx = x + point.getX();
-		double ny = y + point.getY();
-		double nz = z + point.getZ();
+		float nx = x + point.getX();
+		float ny = y + point.getY();
+		float nz = z + point.getZ();
 		return new MyPoint3D(nx, ny, nz);
 	}
 	
 	public MyPoint3D sub(MyPoint3D point) {
-		double nx = x - point.getX();
-		double ny = y - point.getY();
-		double nz = z - point.getZ();
+		float nx = x - point.getX();
+		float ny = y - point.getY();
+		float nz = z - point.getZ();
 		return new MyPoint3D(nx, ny, nz);
 	}
 	
-	public MyPoint3D mul(double t) {
+	public MyPoint3D mul(float t) {
 		return new MyPoint3D(t*x, t*y, t*z);
 	}
 	
-	public double dotProduct(MyPoint3D point) {
+	public float dotProduct(MyPoint3D point) {
 		return x*point.getX() + y*point.getY() + z*point.getZ();
 	}
 	
+	public float getLength() {
+		return (float)Math.sqrt(x*x + y*y + z*z);
+	}
+	
 	public void normalize() {
-		double div = x*x + y*y + z*z;
+		float div = x*x + y*y + z*z;
 		x = x/div;
 		y = y/div;
 		z = z/div;
 	}
 	
-	public MyPoint3D div(double t) {
+	public MyPoint3D div(float t) {
 		return new MyPoint3D(x/t, y/t, z/t);
 	}
 
-	public double getX() {
+	public float getX() {
 		return x;
 	}
 
-	public double getY() {
+	public float getY() {
 		return y;
 	}
 
-	public double getZ() {
+	public float getZ() {
 		return z;
 	}
 }

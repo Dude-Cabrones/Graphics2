@@ -4,20 +4,20 @@ import java.awt.Color;
 
 public class MyMaterial {
 
-	private double diffuseC;
-	private double ambientC;
+	private float diffuseC;
+	private float ambientC;
 	private Color color;
 	
 	public double getDiffuseC() {
 		return diffuseC;
 	}
-	public void setDiffuseC(double diffuseC) {
+	public void setDiffuseC(float diffuseC) {
 		this.diffuseC = diffuseC;
 	}
-	public double getAmbientC() {
+	public float getAmbientC() {
 		return ambientC;
 	}
-	public void setAmbientC(double ambientC) {
+	public void setAmbientC(float ambientC) {
 		this.ambientC = ambientC;
 	}
 	public Color getColor() {

@@ -34,11 +34,11 @@ public class World extends JPanel{
 	private MyPoint3D viewer;
 	
 	// view plane coordinates
-	private double zViewPlane;
-	private double leftViewPlane;
-	private double rightViewPlane;
-	private double bottomViewPlane;
-	private double topViewPlane;
+	private float zViewPlane;
+	private float leftViewPlane;
+	private float rightViewPlane;
+	private float bottomViewPlane;
+	private float topViewPlane;
 	
 	// objects in our world
 	private LinkedList<MyShape> objects;
@@ -46,15 +46,11 @@ public class World extends JPanel{
 	// light sources in our world
 	private LinkedList<LightSource> lights;
 	
-	// coefficients
-	//private static final double diffuseC = 0.5;
-	//private static final double ambientC = 0.1;
-	
 	// pixel memory map
 	int[] memory;
 	
-	public World(MyPoint3D viewer, double zViewPlane, double leftViewPlane, 
-			double rightViewPlane, double bottomViewPlane, double topViewPlane, 
+	public World(MyPoint3D viewer, float zViewPlane, float leftViewPlane, 
+			float rightViewPlane, float bottomViewPlane, float topViewPlane, 
 			int widthPix, int heightPix, Color bgColor) {
 		this.setSize(widthPix, heightPix);
 		this.viewer = viewer;
@@ -82,12 +78,12 @@ public class World extends JPanel{
 	private MyRay shootPixelRay(int x, int y) {
 		MyRay out = new MyRay();
 		
-		double xPart, yPart;
+		float xPart, yPart;
 		xPart = (rightViewPlane - leftViewPlane)/widthPix;
 		yPart = (topViewPlane - bottomViewPlane)/heightPix;
 
-		xPart = leftViewPlane + 0.5*xPart + ((double)x)*xPart;
-		yPart = bottomViewPlane + 0.5*yPart + ((double)y)*yPart;
+		xPart = leftViewPlane + (float)0.5*xPart + ((float)x)*xPart;
+		yPart = bottomViewPlane + (float)0.5*yPart + ((float)y)*yPart;
 		
 		// get ray direction and origin: perspective
 		//out.setOrigin(viewer);
@@ -110,18 +106,29 @@ public class World extends JPanel{
 		return ray;
 	}
 	
+	private float getDiffuseComponent(LightSource source, MyPoint3D normal, 
+			MyPoint3D intersection, MyShape shape) {
+		// TODO: Calculate Factor here that will be multiplied with real color
+		return (float)source.getPower()*(float)source.getDirection().
+				dotProduct(normal)*(float)shape.getMaterial().getDiffuseC();
+	}
+	
+	private float getAmbientComponent(MyShape shape) {
+		return shape.getMaterial().getAmbientC();
+	}
+	
 	private void raytraceImage(int width, int height) {
 		// shoot ray through each pixel
 		for(int y=0; y<height; y++) {
 			for(int x=0; x<width; x++) {
 				MyRay ray = shootPixelRay(x, y);
-				double maxDist = Double.POSITIVE_INFINITY;
+				float maxDist = Float.POSITIVE_INFINITY;
 				
 				// check each object for intersections 
 				// --> get the one with shortest distance
 				MyShape currentShape = null;
 				for(MyShape shape : objects) {
-					double hitDist = shape.rayIntersect(ray);
+					float hitDist = shape.rayIntersect(ray);
 					if(hitDist > zViewPlane - viewer.getZ() && maxDist > hitDist) {
 						maxDist = hitDist;
 						currentShape = shape;
@@ -129,28 +136,21 @@ public class World extends JPanel{
 				}
 				
 				// set pixel in buffer
-				if(maxDist < Double.POSITIVE_INFINITY) {
+				if(maxDist < Float.POSITIVE_INFINITY) {
 					// we got an intersection
 					// -> check for light source
 					// shoot from intersection point in points surface normal direction
 					MyPoint3D intersection = ray.getOrigin().add(ray.getDirection().mul(maxDist));
-					// check if normal points towards any light source
-					int curLight[] = new int[4];
-					curLight[0] = currentShape.getMaterial().getColor().getRed();
-					curLight[1] = currentShape.getMaterial().getColor().getGreen();
-					curLight[2] = currentShape.getMaterial().getColor().getBlue();
-					curLight[3] = currentShape.getMaterial().getColor().getAlpha();
+					MyPoint3D normal = currentShape.getNormal(intersection);
 					
-					int diffLight[] = new int[4];
-					for(int i=0; i<4; i++) {
-						diffLight[i] = curLight[i];
-					}
-					boolean hasLightSource = false;
+					
+					float diffLight = 0;
+					// check if normal points towards any light source
 					for(LightSource source : lights) {
 						if(source.intersects(currentShape.getNormal(intersection))) {
 							// now we shoot a ray from the intersection point and see 
 							// if any other object is in our way --> shadowed?
-							MyRay ray2 = shootRay(intersection, currentShape.getNormal(intersection));
+							MyRay ray2 = shootRay(intersection, normal);
 							boolean isShadowed = false;
 							for(MyShape shape : objects) {
 								if(shape != currentShape) {
@@ -164,48 +164,37 @@ public class World extends JPanel{
 							// in case we are not shadowed -> calculate new light
 							if(!isShadowed) {
 								// TODO: improve
-								// add light from light source
-								hasLightSource = true;
-								double dotProd = -source.getDirection().dotProduct(currentShape.getNormal(intersection));
-								for(int i=0; i<4; i++) {
-									diffLight[i] *= dotProd*source.getBrightness();
-									if(diffLight[i] > 255) {
-										diffLight[i] = 255;
-									}
-									if(diffLight[i] < 0) {
-										diffLight[i] = 0;
-									}
-								}
+								// get diffused light component
+								diffLight += getDiffuseComponent(source, normal, intersection, currentShape);
 							}
 						}
 					}
-					// add gathered diffused light
 					// TODO improve
-					// finally add ambient light
-					int[] ambient = new int[4];
-					for(int i=0; i<4; i++) {
-						ambient[i] += curLight[i]*currentShape.getMaterial().getAmbientC();
-						if(ambient[i] > 255) {
-							ambient[i] = 255;
-						}
-					}
+					// get ambient light component
+					float ambientLight = getAmbientComponent(currentShape);
+					
 					// add lights
 					int[] light = new int[4];
+					light[0] = currentShape.getMaterial().getColor().getRed();
+					light[1] = currentShape.getMaterial().getColor().getGreen();
+					light[2] = currentShape.getMaterial().getColor().getBlue();
+					light[3] = currentShape.getMaterial().getColor().getAlpha();
+					
 					for(int i=0; i<4;i++) {
 						// TODO improve
-						if(hasLightSource) {
-							light[i] = diffLight[i] + ambient[i];
-						} else {
-							light[i] = ambient[i];
-						}
+						light[i] = (int)(light[i]*(ambientLight+diffLight));
 						if(light[i] > 255) {
 							light[i] = 255;
 						}
+						if(light[i] < 0) {
+							light[i] = 0;
+						}
 					}
+					// set light in memory
 					memory[x+y*width] = new Color(light[0], light[1], 
 									light[2], light[3]).getRGB();
 				} else {
-					// no intersection -> use background color
+					// no intersection -> set background color in memory
 					memory[x+y*width] = bgColor.getRGB();
 				}
 			}
