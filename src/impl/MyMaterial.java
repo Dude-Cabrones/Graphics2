@@ -1,6 +1,6 @@
 package impl;
 
-import java.awt.Color;
+import impl.MyColor;
 
 public class MyMaterial {
 
@@ -8,7 +8,7 @@ public class MyMaterial {
 	private float ambientC;
 	private float specularC;
 	private float reflectionProperty;	// < 32: rough	>32: smooth
-	private Color color;
+	private MyColor color;
 	
 	public float getReflectionProperty() {
 		return reflectionProperty;
@@ -34,10 +34,10 @@ public class MyMaterial {
 	public void setAmbientC(float ambientC) {
 		this.ambientC = ambientC;
 	}
-	public Color getColor() {
+	public MyColor getColor() {
 		return color;
 	}
-	public void setColor(Color color) {
+	public void setColor(MyColor color) {
 		this.color = color;
 	}
 }

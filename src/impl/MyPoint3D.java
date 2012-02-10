@@ -46,11 +46,12 @@ public class MyPoint3D {
 		return (float)Math.sqrt(x*x + y*y + z*z);
 	}
 	
-	public void normalize() {
+	public MyPoint3D normalize() {
 		float div = x*x + y*y + z*z;
 		x = x/div;
 		y = y/div;
 		z = z/div;
+		return this;
 	}
 	
 	public MyPoint3D div(float t) {

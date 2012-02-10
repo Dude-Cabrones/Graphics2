@@ -3,6 +3,7 @@ package world;
 import impl.LightSource;
 import impl.MyPoint3D;
 import impl.MyRay;
+import impl.MyColor;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -110,8 +111,9 @@ public class World extends JPanel{
 	private float getDiffuseComponent(LightSource source, MyPoint3D normal, 
 			MyPoint3D intersection, MyShape shape) {
 		// TODO: maybe improve
-		return (float)source.getPower()*(float)source.getDirection().
-				dotProduct(normal)*(float)shape.getMaterial().getDiffuseC();
+		//return (float)source.getPower()*(float)source.getDirection().
+		//		dotProduct(normal)*(float)shape.getMaterial().getDiffuseC();
+		return (float)source.getOrigin().sub(intersection).normalize().dotProduct(normal.normalize())*(float)(10*shape.getMaterial().getDiffuseC());
 	}
 	
 	private float getAmbientComponent(MyShape shape) {
@@ -147,65 +149,125 @@ public class World extends JPanel{
 		
 		return reflectedLight;
 	}
+
+	private MyColor traceRay( MyRay ray, int recursionLevel ) {
+		//MyColor color = MyColor.BLACK;
+		MyColor color = new MyColor(0,0,0);
+		float maxDist = Float.POSITIVE_INFINITY;
+
+		if( recursionLevel > 10 ) {
+			System.out.println("recursion limit reached");
+			return color;
+		}
+		
+		// check each object for intersections 
+		// --> get the one with shortest distance
+		MyShape currentShape = null;
+		for(MyShape shape : objects) {
+			float hitDist = shape.rayIntersect(ray);
+			if(hitDist > zViewPlane - viewer.getZ() && maxDist > hitDist) {
+				maxDist = hitDist;
+				currentShape = shape;
+			}
+		}
+
+		MyPoint3D intersection;
+		MyPoint3D normal;
+
+		// set pixel in buffer
+		if(maxDist < Float.POSITIVE_INFINITY) {
+			// we got an intersection
+			// -> check for light source
+			// shoot from intersection point in points surface normal direction
+			intersection = ray.getOrigin().add(ray.getDirection().mul(maxDist));
+			normal = currentShape.getNormal(intersection);
+			
+			
+			// --------- REFLECTED LIGHT ------------
+			//float specularLight = getReflection(ray,intersection,normal,currentShape);
+			// Rref = Rin - 2*N(Rin*N)
+			MyPoint3D reflectedDir = ray.getDirection().sub(normal.mul(2).mul(ray.getDirection()
+										.dotProduct(normal)));
+			// shoot reflected ray
+			MyRay reflectedRay = shootRay(intersection, reflectedDir);
+			MyColor reflectedColor = traceRay( reflectedRay, recursionLevel+1 );
+			
+			color = color.add( new MyColor(
+					(int)(reflectedColor.getRed()*currentShape.getMaterial().getSpecularC()),
+					(int)(reflectedColor.getGreen()*currentShape.getMaterial().getSpecularC()),
+					(int)(reflectedColor.getBlue()*currentShape.getMaterial().getSpecularC())
+					)
+			);
+			
+
+			
+			// --------- AMBIENT LIGHT --------------
+			// get ambient light component
+			float ambientLight = getAmbientComponent(currentShape);
+			color = color.add( new MyColor(
+					(int)(currentShape.getMaterial().getColor().getRed()*ambientLight),
+					(int)(currentShape.getMaterial().getColor().getGreen()*ambientLight),
+					(int)(currentShape.getMaterial().getColor().getBlue()*ambientLight)
+					)
+			);
+
+			// ---- DIFFUSED LIGHT --------
+			float diffLight = 0;
+			for(LightSource source : lights) {
+				// check if normal points towards light source
+				if(source.intersects(currentShape.getNormal(intersection))) {
+					// now we shoot a ray from the intersection point and see 
+					// if any other object is in our way --> shadowed?
+					MyRay ray2 = shootRay(intersection, source.getOrigin().sub(intersection));
+					boolean isShadowed = false;
+					for(MyShape shape : objects) {
+						if(shape != currentShape) {
+							// check if we got an intersection
+							if(shape.rayIntersect(ray2) > 0) {
+								isShadowed = true;
+								break;
+							}
+						}
+					}
+					// in case we are not shadowed -> calculate new light
+					if(!isShadowed) {
+						// get diffused light component
+						//diffLight += getDiffuseComponent(source, normal, intersection, currentShape);
+
+						// TODO: hier fehlt noch irgendnen specular coeff bestimmt :)
+						//float diff = getDiffuseComponent(source, normal, intersection, currentShape );
+						MyPoint3D dir = source.getOrigin().sub(intersection);
+						float diff = (float)currentShape.getMaterial().getDiffuseC()*dir.dotProduct(normal)/(float)(Math.sqrt(dir.dotProduct(dir))*Math.sqrt(normal.dotProduct(normal)));
+						if( diff > 1 ) {
+							System.out.println("diff");
+							diff = 1;
+						}
+						if( diff > 0 ) {
+							//color = color.add( source.getColor().dim(diff) );
+							color = color.add( currentShape.getMaterial().getColor().mix(source.getColor()).dim(diff) );
+						} else {
+							//color = color.sub( source.getColor().dim(-diff) );
+						}
+
+					}
+				}
+			}
+
+		} // end if shape hit
+
+		return color;
+		
+	}
 	
 	private void raytraceImage(int width, int height) {
 		// shoot ray through each pixel
 		for(int y=0; y<height; y++) {
 			for(int x=0; x<width; x++) {
 				MyRay ray = shootPixelRay(x, y);
-				float maxDist = Float.POSITIVE_INFINITY;
 				
-				// check each object for intersections 
-				// --> get the one with shortest distance
-				MyShape currentShape = null;
-				for(MyShape shape : objects) {
-					float hitDist = shape.rayIntersect(ray);
-					if(hitDist > zViewPlane - viewer.getZ() && maxDist > hitDist) {
-						maxDist = hitDist;
-						currentShape = shape;
-					}
-				}
-				
-				// set pixel in buffer
-				if(maxDist < Float.POSITIVE_INFINITY) {
-					// we got an intersection
-					// -> check for light source
-					// shoot from intersection point in points surface normal direction
-					MyPoint3D intersection = ray.getOrigin().add(ray.getDirection().mul(maxDist));
-					MyPoint3D normal = currentShape.getNormal(intersection);
-					
-					// ---- DIFFUSED LIGHT --------
-					float diffLight = 0;
-					for(LightSource source : lights) {
-						// check if normal points towards light source
-						if(source.intersects(currentShape.getNormal(intersection))) {
-							// now we shoot a ray from the intersection point and see 
-							// if any other object is in our way --> shadowed?
-							MyRay ray2 = shootRay(intersection, normal);
-							boolean isShadowed = false;
-							for(MyShape shape : objects) {
-								if(shape != currentShape) {
-									// check if we got an intersection
-									if(shape.rayIntersect(ray2) > 0) {
-										isShadowed = true;
-										break;
-									}
-								}
-							}
-							// in case we are not shadowed -> calculate new light
-							if(!isShadowed) {
-								// get diffused light component
-								diffLight += getDiffuseComponent(source, normal, intersection, currentShape);
-							}
-						}
-					}
-					// --------- REFLECTED LIGHT ------------
-					float specularLight = getReflection(ray,intersection,normal,currentShape);
-					
-					// --------- AMBIENT LIGHT --------------
-					// get ambient light component
-					float ambientLight = getAmbientComponent(currentShape);
-					
+				memory[x+y*width] = traceRay( ray, 0 ).getRGB();
+
+				/*
 					// add lights
 					int[] light = new int[4];
 					light[0] = currentShape.getMaterial().getColor().getRed();
@@ -230,6 +292,7 @@ public class World extends JPanel{
 					// no intersection -> set background color in memory
 					memory[x+y*width] = bgColor.getRGB();
 				}
+				*/
 			}
 		}
 		System.out.println("Finished Raytracing!!!");
@@ -254,3 +317,4 @@ public class World extends JPanel{
 		frame.setVisible(true);
 	}
 }
+// vim: set ts=4 sw=4 tw=0 :

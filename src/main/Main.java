@@ -1,6 +1,7 @@
 package main;
 
 import impl.LightSource;
+import impl.MyColor;
 import impl.MyMaterial;
 import impl.MyPoint3D;
 
@@ -20,8 +21,9 @@ public class Main {
 		// add light source
 		LightSource sourceA = new LightSource();
 		sourceA.setDirection(new MyPoint3D(1,1,0));
-		sourceA.setOrigin(new MyPoint3D(-100, 100, 50));
+		sourceA.setOrigin(new MyPoint3D(-100, 0, 0));
 		sourceA.setBrightness(1.0f);
+		sourceA.setColor(new MyColor(0,255,255));
 		world.addLight(sourceA);
 		
 		// add light source
@@ -29,13 +31,15 @@ public class Main {
 		sourceB.setDirection(new MyPoint3D(0,1,0));
 		sourceB.setOrigin(new MyPoint3D(100, 100, 30));
 		sourceB.setBrightness(0.5f);
+		sourceB.setColor(new MyColor(255,255,255));
 		world.addLight(sourceB);
 		
 		// add light source
 		LightSource sourceC = new LightSource();
 		sourceC.setDirection(new MyPoint3D(0,0,1));
-		sourceA.setOrigin(new MyPoint3D(0, 100, 20));
+		sourceC.setOrigin(new MyPoint3D(0, 100, 20));
 		sourceC.setBrightness(1.0f);
+		sourceC.setColor(new MyColor(255,255,255));
 		//world.addLight(sourceC);
 		
 		// set up quadratic test shape
@@ -47,25 +51,25 @@ public class Main {
 	
 		// create materials
 		MyMaterial matA = new MyMaterial();
-		matA.setAmbientC(0.7f);
-		matA.setDiffuseC(0.6f);
+		matA.setAmbientC(0.1f);
+		matA.setDiffuseC(0.7f);
 		matA.setSpecularC(0.4f);
 		matA.setReflectionProperty(32);
-		matA.setColor(Color.red);
+		matA.setColor( new MyColor(Color.red));
 		
 		MyMaterial matB = new MyMaterial();
-		matB.setAmbientC(0.7f);
-		matB.setDiffuseC(0.6f);
+		matB.setAmbientC(0.1f);
+		matB.setDiffuseC(0.4f);
 		matB.setSpecularC(0.4f);
 		matB.setReflectionProperty(32);
-		matB.setColor(Color.blue);
+		matB.setColor( new MyColor(Color.blue));
 		
 		MyMaterial matC = new MyMaterial();
-		matC.setAmbientC(0.7f);
-		matC.setDiffuseC(0.6f);
-		matC.setSpecularC(0.4f);
+		matC.setAmbientC(0.1f);
+		matC.setDiffuseC(0.4f);
+		matC.setSpecularC(1f);
 		matC.setReflectionProperty(32);
-		matC.setColor(Color.yellow);
+		matC.setColor( new MyColor(Color.YELLOW) );
 		
 		// add test sphere
 		MyPoint3D center = new MyPoint3D(80, 20, 30);
@@ -76,7 +80,7 @@ public class Main {
 		world.addShape(new MySphere(new MyPoint3D(-100, -100, 50), 40, matB));
 		
 		// add test sphere
-		world.addShape(new MySphere(new MyPoint3D(0, 0, 30), 29, matC));
+		world.addShape(new MySphere(new MyPoint3D(0, 0, 200), 100, matC));
 		
 		// render test shapes
 		world.display();
