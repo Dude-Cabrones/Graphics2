@@ -102,19 +102,50 @@ public class World extends JPanel{
 	private MyRay shootRay(MyPoint3D from, MyPoint3D dir) {
 		MyRay ray = new MyRay();
 		ray.setOrigin(from);
+		dir.normalize();
 		ray.setDirection(dir);
 		return ray;
 	}
 	
 	private float getDiffuseComponent(LightSource source, MyPoint3D normal, 
 			MyPoint3D intersection, MyShape shape) {
-		// TODO: Calculate Factor here that will be multiplied with real color
+		// TODO: maybe improve
 		return (float)source.getPower()*(float)source.getDirection().
 				dotProduct(normal)*(float)shape.getMaterial().getDiffuseC();
 	}
 	
 	private float getAmbientComponent(MyShape shape) {
+		// TODO: maybe improve
 		return shape.getMaterial().getAmbientC();
+	}
+	
+	private float getReflection(MyRay viewRay, MyPoint3D intersection, MyPoint3D normal, MyShape currentShape) {
+		float reflectedLight = 0;
+		normal.normalize();
+		// Rref = Rin - 2*N(Rin*N)
+		MyPoint3D reflectedDir = viewRay.getDirection().sub(normal.mul(2).mul(viewRay.getDirection()
+									.dotProduct(normal)));
+		// shoot reflected ray
+		MyRay reflectedRay = shootRay(intersection, reflectedDir);
+		// check for intersection
+		float maxDist = Float.POSITIVE_INFINITY;
+		for(MyShape shape : objects) {
+			if(currentShape != shape) {
+				float hitDist = shape.rayIntersect(reflectedRay);
+				if(hitDist > 0 && maxDist > hitDist) {
+					maxDist = hitDist;
+				}
+			}
+		}
+		// get reflected light from closest intersection
+		if(maxDist < Float.POSITIVE_INFINITY) {
+			reflectedLight = currentShape.getMaterial().getSpecularC()*
+				((currentShape.getMaterial().getReflectionProperty()+2)/(2*(float)Math.PI))
+				*((float)Math.pow(normal.dotProduct(viewRay.getDirection()), 
+						currentShape.getMaterial().getReflectionProperty()));
+		}
+		
+		return reflectedLight;
 	}
 	
 	private void raytraceImage(int width, int height) {
@@ -143,10 +174,10 @@ public class World extends JPanel{
 					MyPoint3D intersection = ray.getOrigin().add(ray.getDirection().mul(maxDist));
 					MyPoint3D normal = currentShape.getNormal(intersection);
 					
-					
+					// ---- DIFFUSED LIGHT --------
 					float diffLight = 0;
-					// check if normal points towards any light source
 					for(LightSource source : lights) {
+						// check if normal points towards light source
 						if(source.intersects(currentShape.getNormal(intersection))) {
 							// now we shoot a ray from the intersection point and see 
 							// if any other object is in our way --> shadowed?
@@ -163,13 +194,15 @@ public class World extends JPanel{
 							}
 							// in case we are not shadowed -> calculate new light
 							if(!isShadowed) {
-								// TODO: improve
 								// get diffused light component
 								diffLight += getDiffuseComponent(source, normal, intersection, currentShape);
 							}
 						}
 					}
-					// TODO improve
+					// --------- REFLECTED LIGHT ------------
+					float specularLight = getReflection(ray,intersection,normal,currentShape);
+					
+					// --------- AMBIENT LIGHT --------------
 					// get ambient light component
 					float ambientLight = getAmbientComponent(currentShape);
 					
@@ -182,7 +215,7 @@ public class World extends JPanel{
 					
 					for(int i=0; i<3;i++) {
 						// TODO improve
-						light[i] = (int)(light[i] - light[i]*(ambientLight+diffLight));
+						light[i] = (int)(light[i] - light[i]*(ambientLight+diffLight+specularLight));
 						if(light[i] > 255) {
 							light[i] = 255;
 						}

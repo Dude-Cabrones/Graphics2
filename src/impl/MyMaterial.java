@@ -6,8 +6,22 @@ public class MyMaterial {
 
 	private float diffuseC;
 	private float ambientC;
+	private float specularC;
+	private float reflectionProperty;	// < 32: rough	>32: smooth
 	private Color color;
 	
+	public float getReflectionProperty() {
+		return reflectionProperty;
+	}
+	public void setReflectionProperty(float reflectionProperty) {
+		this.reflectionProperty = reflectionProperty;
+	}
+	public float getSpecularC() {
+		return specularC;
+	}
+	public void setSpecularC(float specularC) {
+		this.specularC = specularC;
+	}
 	public double getDiffuseC() {
 		return diffuseC;
 	}

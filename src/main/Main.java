@@ -48,22 +48,28 @@ public class Main {
 		// create materials
 		MyMaterial matA = new MyMaterial();
 		matA.setAmbientC(0.7f);
-		matA.setDiffuseC(0.7f);
+		matA.setDiffuseC(0.6f);
+		matA.setSpecularC(0.4f);
+		matA.setReflectionProperty(32);
 		matA.setColor(Color.red);
 		
 		MyMaterial matB = new MyMaterial();
 		matB.setAmbientC(0.7f);
-		matB.setDiffuseC(0.7f);
+		matB.setDiffuseC(0.6f);
+		matB.setSpecularC(0.4f);
+		matB.setReflectionProperty(32);
 		matB.setColor(Color.blue);
 		
 		MyMaterial matC = new MyMaterial();
 		matC.setAmbientC(0.7f);
-		matC.setDiffuseC(0.7f);
+		matC.setDiffuseC(0.6f);
+		matC.setSpecularC(0.4f);
+		matC.setReflectionProperty(32);
 		matC.setColor(Color.yellow);
 		
 		// add test sphere
-		MyPoint3D center = new MyPoint3D(100, 20, 40);
-		MySphere sphereA = new MySphere(center, 30, matA);
+		MyPoint3D center = new MyPoint3D(80, 20, 30);
+		MySphere sphereA = new MySphere(center, 25, matA);
 		world.addShape(sphereA);
 		
 		// add test sphere
