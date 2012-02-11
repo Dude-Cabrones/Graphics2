@@ -80,13 +80,14 @@ public class Main {
 		matD.setReflectionProperty(32);
 		matD.setColor(new MyColor(Color.GREEN));
 		
-		// set up polygon shape
-		MyPoint3D ta = new MyPoint3D(50, 50, 50);
-		MyPoint3D tb = new MyPoint3D(-50, 50, 50);
-		MyPoint3D tc = new MyPoint3D(0, 0, 50);
+		// set up polygon shape (in one plane!)
+		MyPoint3D ta = new MyPoint3D(80, -80, 100);
+		MyPoint3D tb = new MyPoint3D(120, 120, 20);
+		MyPoint3D tc = new MyPoint3D(0, 200, 20);
+		MyPoint3D td = new MyPoint3D(40, 20, 100);
 		LinkedList<MyPoint3D> keyPoints = new LinkedList<MyPoint3D>();
-		keyPoints.add(ta); keyPoints.add(tb); keyPoints.add(tc);
-		//world.addShape(new MyPolygon(keyPoints, matD));
+		keyPoints.add(ta); keyPoints.add(tb); keyPoints.add(tc); keyPoints.add(td);
+		world.addShape(new MyPolygon(keyPoints, matD));
 
 		
 		// add test sphere

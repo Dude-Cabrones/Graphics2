@@ -25,10 +25,9 @@ public class MyPolygon implements MyShape{
 
 	@Override
 	public MyPoint3D getNormal(MyPoint3D point) {
-		// TODO: improve
-		// (V3 - V2)x(V1 - V2)
-		return (keyPoints.get(2).sub(keyPoints.get(1))).
-				crossProduct((keyPoints.get(0).sub(keyPoints.get(1)))).normalize().mul(-1);
+		// (V1 - V0)x(V2 - V0)
+		return (keyPoints.get(1).sub(keyPoints.get(0))).
+				crossProduct((keyPoints.get(2).sub(keyPoints.get(1)))).normalize();
 	}
 
 	@Override
@@ -39,14 +38,13 @@ public class MyPolygon implements MyShape{
 	@Override
 	public CalcTuple rayIntersect(MyRay ray) {
 		CalcTuple resultTuple = new CalcTuple();
-		// (N*(Q-E))/(E*D)
-		float t = (getNormal(null).dotProduct((keyPoints.get(0).sub(ray.getOrigin())))
-				/(ray.getOrigin().dotProduct(ray.getDirection())));
+		// (N*(PlanePoint-RayOrig))/(N*RayDir)
+		float t = (getNormal(null).dotProduct(keyPoints.getFirst().sub(ray.getOrigin())))
+					/(getNormal(null).dotProduct(ray.getDirection()));
 		// intersection point with polygon plane
 		MyPoint3D intersection = ray.getOrigin().add(ray.getDirection().mul(t));
-//		System.out.println("x:"+intersection.getX()+" y:"+intersection.getY()+" z:"+intersection.getZ());
 		
-		if(t >= 0) {
+		if(t > 0 && isInsidePolygon(intersection)) {
 			resultTuple.setRoots(1);
 			resultTuple.setClosestIntersection(t);
 		}
@@ -69,12 +67,10 @@ public class MyPolygon implements MyShape{
 			} else {
 				pointB = keyPoints.get(0);
 			}
-			if(intersection.getX() > pointA.getX() || intersection.getX() > pointB.getX()) {
-				if(intersection.getY() <= pointA.getY() && intersection.getY() >= pointB.getY()
-						|| intersection.getY() >= pointA.getY() && intersection.getY() <= pointB.getY()) {
-					System.out.println("CNT");
-					cnt++;
-				}
+			if(pointA.getY() > intersection.getY() != pointB.getY() > intersection.getY() &&
+					intersection.getX() < (pointB.getX()-pointA.getX())*(intersection.getY()-pointA.getY())/
+					(pointB.getY()-pointA.getY()) + pointA.getX()) {
+				cnt++;
 			}
 		}
 		return cnt%2 == 1;
