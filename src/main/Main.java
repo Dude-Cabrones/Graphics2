@@ -6,7 +6,9 @@ import impl.MyMaterial;
 import impl.MyPoint3D;
 
 import java.awt.Color;
+import java.util.LinkedList;
 
+import shapes.MyPolygon;
 import shapes.MySphere;
 import world.World;
 
@@ -16,7 +18,7 @@ public class Main {
 		
 		// set up viewer and view plane
 		MyPoint3D viewer = new MyPoint3D(0, 0, -10);
-		World world = new World(viewer, 1, -200, 200, -200, 200, 300, 300, Color.gray);
+		World world = new World(viewer, 1, -400, 400, -400, 400, 800, 600);
 	
 		// add light source
 		LightSource sourceA = new LightSource();
@@ -70,6 +72,22 @@ public class Main {
 		matC.setSpecularC(1f);
 		matC.setReflectionProperty(32);
 		matC.setColor( new MyColor(Color.YELLOW) );
+		
+		MyMaterial matD = new MyMaterial();
+		matD.setAmbientC(0.1f);
+		matD.setDiffuseC(0.4f);
+		matD.setSpecularC(1f);
+		matD.setReflectionProperty(32);
+		matD.setColor(new MyColor(Color.GREEN));
+		
+		// set up polygon shape
+		MyPoint3D ta = new MyPoint3D(50, 50, 50);
+		MyPoint3D tb = new MyPoint3D(-50, 50, 50);
+		MyPoint3D tc = new MyPoint3D(0, 0, 50);
+		LinkedList<MyPoint3D> keyPoints = new LinkedList<MyPoint3D>();
+		keyPoints.add(ta); keyPoints.add(tb); keyPoints.add(tc);
+		//world.addShape(new MyPolygon(keyPoints, matD));
+
 		
 		// add test sphere
 		MyPoint3D center = new MyPoint3D(80, 20, 30);

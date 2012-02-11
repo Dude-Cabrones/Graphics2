@@ -26,7 +26,7 @@ public class Calc {
 			x1 = q;
 		}
 		
-		if(x1 == x2) {
+		if(x1 == x2 || x2 < 0 || x1 < 0) {
 			return new CalcTuple(1, x1, x2);
 		} else {
 			return new CalcTuple(2, x1, x2);

@@ -1,11 +1,11 @@
 package world;
 
+import impl.CalcTuple;
 import impl.LightSource;
+import impl.MyColor;
 import impl.MyPoint3D;
 import impl.MyRay;
-import impl.MyColor;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -29,7 +29,7 @@ public class World extends JPanel{
 	private int heightPix;
 	
 	// background color
-	private Color bgColor;
+//	private Color bgColor;
 	
 	// viewer
 	private MyPoint3D viewer;
@@ -52,7 +52,7 @@ public class World extends JPanel{
 	
 	public World(MyPoint3D viewer, float zViewPlane, float leftViewPlane, 
 			float rightViewPlane, float bottomViewPlane, float topViewPlane, 
-			int widthPix, int heightPix, Color bgColor) {
+			int widthPix, int heightPix) {
 		this.setSize(widthPix, heightPix);
 		this.viewer = viewer;
 		this.zViewPlane = zViewPlane;
@@ -62,7 +62,6 @@ public class World extends JPanel{
 		this.topViewPlane = topViewPlane;
 		this.widthPix = widthPix;
 		this.heightPix = heightPix;
-		this.bgColor = bgColor;
 		objects = new LinkedList<MyShape>();
 		lights = new LinkedList<LightSource>();
 		memory = new int[widthPix*heightPix];
@@ -108,47 +107,47 @@ public class World extends JPanel{
 		return ray;
 	}
 	
-	private float getDiffuseComponent(LightSource source, MyPoint3D normal, 
-			MyPoint3D intersection, MyShape shape) {
-		// TODO: maybe improve
-		//return (float)source.getPower()*(float)source.getDirection().
-		//		dotProduct(normal)*(float)shape.getMaterial().getDiffuseC();
-		return (float)source.getOrigin().sub(intersection).normalize().dotProduct(normal.normalize())*(float)(10*shape.getMaterial().getDiffuseC());
-	}
+//	private float getDiffuseComponent(LightSource source, MyPoint3D normal, 
+//			MyPoint3D intersection, MyShape shape) {
+//		// TODO: maybe improve
+//		//return (float)source.getPower()*(float)source.getDirection().
+//		//		dotProduct(normal)*(float)shape.getMaterial().getDiffuseC();
+//		return (float)source.getOrigin().sub(intersection).normalize().dotProduct(normal.normalize())*(float)(10*shape.getMaterial().getDiffuseC());
+//	}
 	
 	private float getAmbientComponent(MyShape shape) {
 		// TODO: maybe improve
 		return shape.getMaterial().getAmbientC();
 	}
 	
-	private float getReflection(MyRay viewRay, MyPoint3D intersection, MyPoint3D normal, MyShape currentShape) {
-		float reflectedLight = 0;
-		normal.normalize();
-		// Rref = Rin - 2*N(Rin*N)
-		MyPoint3D reflectedDir = viewRay.getDirection().sub(normal.mul(2).mul(viewRay.getDirection()
-									.dotProduct(normal)));
-		// shoot reflected ray
-		MyRay reflectedRay = shootRay(intersection, reflectedDir);
-		// check for intersection
-		float maxDist = Float.POSITIVE_INFINITY;
-		for(MyShape shape : objects) {
-			if(currentShape != shape) {
-				float hitDist = shape.rayIntersect(reflectedRay);
-				if(hitDist > 0 && maxDist > hitDist) {
-					maxDist = hitDist;
-				}
-			}
-		}
-		// get reflected light from closest intersection
-		if(maxDist < Float.POSITIVE_INFINITY) {
-			reflectedLight = currentShape.getMaterial().getSpecularC()*
-				((currentShape.getMaterial().getReflectionProperty()+2)/(2*(float)Math.PI))
-				*((float)Math.pow(normal.dotProduct(viewRay.getDirection()), 
-						currentShape.getMaterial().getReflectionProperty()));
-		}
-		
-		return reflectedLight;
-	}
+//	private float getReflection(MyRay viewRay, MyPoint3D intersection, MyPoint3D normal, MyShape currentShape) {
+//		float reflectedLight = 0;
+//		normal.normalize();
+//		// Rref = Rin - 2*N(Rin*N)
+//		MyPoint3D reflectedDir = viewRay.getDirection().sub(normal.mul(2).mul(viewRay.getDirection()
+//									.dotProduct(normal)));
+//		// shoot reflected ray
+//		MyRay reflectedRay = shootRay(intersection, reflectedDir);
+//		// check for intersection
+//		float maxDist = Float.POSITIVE_INFINITY;
+//		for(MyShape shape : objects) {
+//			if(currentShape != shape) {
+//				float hitDist = shape.rayIntersect(reflectedRay);
+//				if(hitDist > 0 && maxDist > hitDist) {
+//					maxDist = hitDist;
+//				}
+//			}
+//		}
+//		// get reflected light from closest intersection
+//		if(maxDist < Float.POSITIVE_INFINITY) {
+//			reflectedLight = currentShape.getMaterial().getSpecularC()*
+//				((currentShape.getMaterial().getReflectionProperty()+2)/(2*(float)Math.PI))
+//				*((float)Math.pow(normal.dotProduct(viewRay.getDirection()), 
+//						currentShape.getMaterial().getReflectionProperty()));
+//		}
+//		
+//		return reflectedLight;
+//	}
 
 	private MyColor traceRay( MyRay ray, int recursionLevel ) {
 		//MyColor color = MyColor.BLACK;
@@ -164,7 +163,8 @@ public class World extends JPanel{
 		// --> get the one with shortest distance
 		MyShape currentShape = null;
 		for(MyShape shape : objects) {
-			float hitDist = shape.rayIntersect(ray);
+			CalcTuple resultTuple = shape.rayIntersect(ray);
+			float hitDist = resultTuple.getClosestIntersection();
 			if(hitDist > zViewPlane - viewer.getZ() && maxDist > hitDist) {
 				maxDist = hitDist;
 				currentShape = shape;
@@ -199,8 +199,6 @@ public class World extends JPanel{
 					)
 			);
 			
-
-			
 			// --------- AMBIENT LIGHT --------------
 			// get ambient light component
 			float ambientLight = getAmbientComponent(currentShape);
@@ -212,7 +210,7 @@ public class World extends JPanel{
 			);
 
 			// ---- DIFFUSED LIGHT --------
-			float diffLight = 0;
+			//float diffLight = 0;
 			for(LightSource source : lights) {
 				// check if normal points towards light source
 				if(source.intersects(currentShape.getNormal(intersection))) {
@@ -221,9 +219,17 @@ public class World extends JPanel{
 					MyRay ray2 = shootRay(intersection, source.getOrigin().sub(intersection));
 					boolean isShadowed = false;
 					for(MyShape shape : objects) {
+						CalcTuple resultTuple = shape.rayIntersect(ray2);
 						if(shape != currentShape) {
 							// check if we got an intersection
-							if(shape.rayIntersect(ray2) > 0) {
+							if(resultTuple.getRoots() > 0) {
+								isShadowed = true;
+								break;
+							}
+						} 
+						// check if our own body blocks
+						else {
+							if(resultTuple.getRoots() > 1) {
 								isShadowed = true;
 								break;
 							}
@@ -239,7 +245,7 @@ public class World extends JPanel{
 						MyPoint3D dir = source.getOrigin().sub(intersection);
 						float diff = (float)currentShape.getMaterial().getDiffuseC()*dir.dotProduct(normal)/(float)(Math.sqrt(dir.dotProduct(dir))*Math.sqrt(normal.dotProduct(normal)));
 						if( diff > 1 ) {
-							System.out.println("diff");
+							//System.out.println("diff");
 							diff = 1;
 						}
 						if( diff > 0 ) {

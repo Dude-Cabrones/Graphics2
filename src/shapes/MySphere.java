@@ -1,5 +1,7 @@
 package shapes;
 
+import java.util.LinkedList;
+
 import impl.Calc;
 import impl.CalcTuple;
 import impl.MyMaterial;
@@ -8,20 +10,23 @@ import impl.MyRay;
 
 public class MySphere implements MyShape{
 
-	private MyPoint3D position;	// sphere center
+	private LinkedList<MyPoint3D> keyPoints;	// sphere center
 	private MyMaterial material;	// material
 	private float radius;	// radius
 	
 	public MySphere(MyPoint3D position, float radius, MyMaterial material) {
 		super();
-		this.position = position;
+		LinkedList<MyPoint3D> points = new LinkedList<MyPoint3D>();
+		points.add(position);
+		this.keyPoints = points;
 		this.radius = radius;
 		this.material = material;
 	}
 	
-	public float rayIntersect(MyRay ray) {
+	@Override
+	public CalcTuple rayIntersect(MyRay ray) {
 		float boundingSquare = radius*radius;
-		MyPoint3D origin = ray.getOrigin().sub(position);
+		MyPoint3D origin = ray.getOrigin().sub(keyPoints.getFirst());
 		float a, b, c;
 		a = ray.getDirection().dotProduct(ray.getDirection());
 		b = 2*(origin.dotProduct(ray.getDirection()));
@@ -32,15 +37,18 @@ public class MySphere implements MyShape{
 
 		// return closest intersection point (if any)
 		if(tup.getRoots() > 0) {
-			return tup.getIntersectionA() >= 0 
-				? tup.getIntersectionA() : tup.getIntersectionB();
+			if(tup.getIntersectionA() >= 0) tup.setClosestIntersection(tup.getIntersectionA());
+			else tup.setClosestIntersection(tup.getIntersectionB());
+			return tup;
 		} else {
-			return -1;
+			tup.setClosestIntersection(-1);
+			return tup;
 		}
 	}
 	
+	@Override
 	public MyPoint3D getNormal(MyPoint3D point) {
-		return point.sub(position).div(radius);
+		return point.sub(keyPoints.getFirst()).div(radius);
 	}
 
 	public double getRadius() {
@@ -53,8 +61,8 @@ public class MySphere implements MyShape{
 	}
 
 	@Override
-	public MyPoint3D getPosition() {
-		return position;
+	public LinkedList<MyPoint3D> getKeyPoints() {
+		return keyPoints;
 	}
 
 	@Override
@@ -63,7 +71,7 @@ public class MySphere implements MyShape{
 	}
 
 	@Override
-	public void setPosition(MyPoint3D position) {
-		this.position = position;
+	public void setKeyPoints(LinkedList<MyPoint3D> keyPoints) {
+		this.keyPoints = keyPoints;
 	}
 }

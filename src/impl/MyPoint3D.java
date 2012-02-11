@@ -34,6 +34,13 @@ public class MyPoint3D {
 		return new MyPoint3D(nx, ny, nz);
 	}
 	
+	public MyPoint3D crossProduct(MyPoint3D point) {
+		float nx = y*point.getZ() - z*point.getY();
+		float ny = z*point.getX() - x*point.getZ();
+		float nz = x*point.getY() - y*point.getX();
+		return new MyPoint3D(nx,ny,nz);
+	}
+	
 	public MyPoint3D mul(float t) {
 		return new MyPoint3D(t*x, t*y, t*z);
 	}
